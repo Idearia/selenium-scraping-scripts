@@ -2,24 +2,12 @@
 ## restaurant page, in the following format
 ## Review's date - Reviewer's name => Rating value
 
-
-##Review Selector
-## id = driver.get_attribute('id')
-## date = driver.find_element_by_class_name('ratingDate').get_attribute('title')
-## date = datetime.datetime.strptime(date, self.i18n[self.language]['date_format'])
-## title = driver.find_element_by_class_name('quote').find_element_by_tag_name('a').find_element_by_class_name('noQuotes').text
-## user = driver.find_element_by_class_name('memberOverlayLink').get_attribute('id')
-##
-
-
-
-# Import Selenium
+# Load Selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time
 import csv
-
 
 # Webpage to crawl
 url = "https://www.tripadvisor.it/Restaurant_Review-g187791-d2321183-Reviews-Sacco_Bistrot-Rome_Lazio.html"
@@ -33,31 +21,27 @@ più = ".ulBlueLinks"
 buttonNext = ".next"
 risto = input("Quale Ristorante? ")
 
-
-
-
 # Select driver (Chrome Headless)
-#options = webdriver.ChromeOptions()
-#options.add_argument('headless')
-#driver = webdriver.Chrome(chrome_options=options)
+options = webdriver.ChromeOptions()
+options.add_argument('headless')
+driver = webdriver.Chrome(chrome_options=options)
 
-# Select driver (Chrome Head)
-driver = webdriver.Chrome()
+# Uncomment to use normal (non-headless) browser
+# driver = webdriver.Chrome()
 
-
-
-# Get URL HTML
+# Get HTML from URL
 driver.get(url)
 
-
-
-# wait 6 seconds
+# Wait 6 seconds
 time.sleep(6)
-# click on the "più" button
+
+# Expand review area
 driver.find_element_by_css_selector(più).click()
-# wait 2 seconds
+
+# Wait 2 seconds
 time.sleep(2)
-# get element
+
+# Get relevant review elements using CSS selectors
 rec_title = driver.find_element_by_css_selector(titolo).text
 rec_date = driver.find_element_by_css_selector(data).get_attribute('title')
 rec_user = driver.find_element_by_class_name('memberOverlayLink').get_attribute('id')
@@ -66,12 +50,11 @@ rec_text = driver.find_element_by_css_selector(testo).text
 rec_mobile = driver.find_element_by_css_selector(mobile).text
 rec_valore = driver.find_element_by_css_selector(valore).get_attribute('class')
 
-# wait 2 seconds and click on navigation button
-#time.sleep(2)
-#driver.find_element_by_css_selector(buttonNext).click()
+# Wait 2 seconds and go to next page
+# time.sleep(2)
+# driver.find_element_by_css_selector(buttonNext).click()
 
-
-# Print to screen
+# Print reviews to screen
 print("------------------------")
 print(rec_title)
 print(rec_date)
@@ -83,14 +66,10 @@ print("------------------------")
 print(rec_text)
 print("------------------------")
 
-# export results in csv file
+# Export results in CSV file
 export = [rec_user_name,rec_date, rec_title, rec_valore, rec_text,]
 out = csv.writer(open(risto+".csv","w"), delimiter=',',quoting=csv.QUOTE_ALL)
 out.writerow(export)
 
-
-
 # Close driver
-#time.sleep(5)
-
 driver.close()
