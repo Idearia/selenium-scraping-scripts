@@ -19,7 +19,7 @@ sys.path.insert(0,parentdir+'/includes')
 import common
 
 # Webpage to crawl
-url = "https://www.tripadvisor.it/Restaurant_Review-g187791-d2321183-Reviews-Sacco_Bistrot-Rome_Lazio.html"
+url = input("Paste the URL:  ")  #"https://www.tripadvisor.it/Restaurant_Review-g187791-d2321183-Reviews-Sacco_Bistrot-Rome_Lazio.html"
 
 # Main review element, containing all other elements (title, description, ratings...)
 review_container_selector = ".review"
@@ -48,7 +48,8 @@ driver.get(url)
 time.sleep(6)
 
 # Expand review area
-driver.find_element_by_css_selector(more_selector).click()
+if driver.find_element_by_css_selector(more_selector).is_displayed:
+    driver.find_element_by_css_selector(more_selector).click()
 
 # Wait 2 seconds
 time.sleep(2)
