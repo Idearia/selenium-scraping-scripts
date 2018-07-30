@@ -12,6 +12,8 @@ import csv
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Load our Selenium library
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -49,7 +51,7 @@ options.add_argument('headless')   # Uncomment to use headless browser
 driver = webdriver.Chrome(chrome_options=options)
 
 # Each 'find' by Selenium has this amount of time to work
-driver.implicitly_wait(1)
+#driver.implicitly_wait(1)
 
 # Get HTML from URL
 driver.get(url)
@@ -97,32 +99,49 @@ while True: # each iteration is a review page
         review_number += 1
         review_number_in_current_page += 1
 
-        print( '_______ Review number %d ________' % review_number_in_current_page )
+        print('_______ Review number %d ________' % review_number_in_current_page)
 
         # Initialize review dictionary
         review_dict = {}
-        
+
+        # Give time to Selenium to identify all the selectors
+
         # Get relevant review elements using CSS selectors
-        review_dict['title'] = common.find_element_text_or_default(review, title_selector)
-        review_dict['date'] = common.find_element_attribute_or_default(review, date_selector, 'title')
-        review_dict['reviewer_name'] = common.find_element_text_or_default(review, reviewer_name_selector)
-        review_dict['text'] = common.find_element_text_or_default(review, text_selector)
-        review_dict['mobile'] = common.find_element_text_or_default(review, is_mobile_selector)
-        review_dict['rating'] =  common.find_element_attribute_or_default(review, rating_selector, 'class')
-        # review_dict['reviewer_id'] = review.find_element_by_class_name('memberOverlayLink').get_attribute('id')
+        title_element = common.selenium_breaths(review, title_selector)
+        review_dict['title'] = title_element.text
+        # review_dict['title'] =     #common.find_element_text_or_default(review, title_selector)
 
-        # Sanitize review elements
-        if len(review_dict['rating']) > 2:
-            review_dict['rating'] = review_dict['rating'][-2:-1] #ui_bubble_rating bubble_30
+        print("TITOLO = " + review_dict['title'])
 
-        # Validate review dictionary
-        # review_functions.validate_review(review_dict)
+        # common.selenium_breaths(driver, date_selector)
+        # review_dict['date'] = common.find_element_attribute_or_default(review, date_selector, 'title')
+
+        # common.selenium_breaths(driver, reviewer_name_selector)
+        # review_dict['reviewer_name'] = common.find_element_text_or_default(review, reviewer_name_selector)
+
+        # common.selenium_breaths(driver, text_selector)
+        # review_dict['text'] = common.find_element_text_or_default(review, text_selector)
+
+        # common.selenium_breaths(driver, is_mobile_selector)
+        # review_dict['mobile'] = common.find_element_text_or_default(review, is_mobile_selector)
+
+        # common.selenium_breaths(driver, rating_selector)
+        # review_dict['rating'] =  common.find_element_attribute_or_default(review, rating_selector, 'class')
+
+        # # review_dict['reviewer_id'] = review.find_element_by_class_name('memberOverlayLink').get_attribute('id')
+
+        # # Sanitize review elements
+        # if len(review_dict['rating']) > 2:
+        #     review_dict['rating'] = review_dict['rating'][-2:-1] #ui_bubble_rating bubble_30
+
+        # # Validate review dictionary
+        # # review_functions.validate_review(review_dict)
 
         # # Uncomment to print reviews to screen
-        review_functions.trip_print_review(review_dict)
+        # review_functions.trip_print_review(review_dict)
 
         # # Uncomment to export results in csv file
-        review_functions.trip_export_review(review_dict, page_name)
+        # #review_functions.trip_export_review(review_dict, page_name)
 
     # Determine whether we are on the last page
     last_page = False
