@@ -56,10 +56,6 @@ driver.get(url)
 common.wait_for_page_load()
 page_number_tot = common.find_element_text_or_default(driver, page_number_selector)
 
-# Expand review area
-if driver.find_element_by_css_selector(more_selector).is_enabled:
-    driver.find_element_by_css_selector(more_selector).click()
-
 # Get Title for CSV
 page_name = driver.find_element_by_css_selector(page_name_selector).text
 
@@ -82,6 +78,16 @@ while True: # each iteration is a review page
 
     # Get all review containers
     review_container_elements = driver.find_elements_by_css_selector(review_container_selector)
+
+    # Expand review area by clicking on the "Click for more" button
+    try:
+        click_for_more_element = driver.find_element_by_css_selector(more_selector)
+        if click_for_more_element.is_enabled():
+            click_for_more_element.click()
+    # Ok if the button does not exist: it means all reviews on the
+    # page are short
+    except:
+        pass
 
     # Loop through the list of review containers and for each them scrape the
     # relevant review elements
@@ -116,7 +122,7 @@ while True: # each iteration is a review page
         review_functions.trip_print_review(review_dict)
 
         # # Uncomment to export results in csv file
-        # review_functions.trip_export_review(review_dict, page_name)
+        review_functions.trip_export_review(review_dict, page_name)
 
     # Determine whether we are on the last page
     last_page = False
@@ -137,53 +143,3 @@ while True: # each iteration is a review page
 
 
 driver.close()
-
-
-
-
-## Loop - For each review container, extract its relevant elements
-# while review_number < 10 or page_number <= int(page_number_tot):
-#     for review in review_container_elements:
-#         review_dict = {}
-#         #time.sleep(2)
-        
-#         # Get relevant review elements using CSS selectors
-#         review_dict['title'] = common.find_element_text_or_default(review, title_selector)
-#         review_dict['date'] = common.find_element_attribute_or_default(review, date_selector, 'title')
-#         review_dict['reviewer_name'] = common.find_element_text_or_default(review, reviewer_name_selector)
-#         review_dict['text'] = common.find_element_text_or_default(review, text_selector)
-#         review_dict['mobile'] = common.find_element_text_or_default(review, is_mobile_selector)
-#         review_dict['rating'] =  common.find_element_attribute_or_default(review, rating_selector, 'class')
-#         # review_dict['reviewer_id'] = review.find_element_by_class_name('memberOverlayLink').get_attribute('id')
-
-#         # Sanitize review elements
-#         if len(review_dict['rating']) > 2:
-#             review_dict['rating'] = review_dict['rating'][-2:-1] #ui_bubble_rating bubble_30
-
-#         # Validate review dictionary
-#         review_functions.validate_review(review_dict)
-
-#         # Uncomment to print reviews to screen
-#         review_functions.trip_print_review(review_dict, review_number)
-
-#         # Uncomment to export results in csv file
-#         review_functions.trip_export_review(review_dict, page_name)
-
-#         review_number += 1
-
-#     # if review_number >= 10 and page_number < int(page_number_tot):
-#     #     driver.find_element_by_css_selector(buttonNext_selector).click()
-#     #     time.sleep(2)
-#     #     page_number += 1
-#     #     review_number = 0
-#     try:
-#         driver.find_element_by_css_selector(buttonNext_selector).click()
-#         page_number += 1
-#         review_number = 0
-#         time.sleep(2)
-#     except:
-#         driver.close()
-#         exit()
-
-# Close driver
-#driver.close()
