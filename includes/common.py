@@ -1,34 +1,70 @@
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
-def find_element_text_or_default(parent_element, css_selector, default_value="NOT FOUND"):
-    """Find an element via a CSS selector and extract its text
-    Returns the default value if the elmenent cannot be found.
+def find_elements_or_default(parent_element, css_selector, default_value="NOT FOUND", wait_time = 20):
+    """Find elements via a CSS selector and return them as a list.
+    If not found, return the default_value argument.
     """
-    output = default_value # initialize output 
+    elements = default_value # initialize output 
     try:
-        output = parent_element.find_element_by_css_selector(css_selector).text
+        elements = WebDriverWait(parent_element, wait_time).until(
+            EC.presence_of_all_elements_located(('css', css_selector))
+        )
     except:
+        # Uncomment to throw an error
+        # raise NameError("Element: " + css_selector + " not found")
         pass
-    return output      
+    return elements
 
-def find_element_attribute_or_default(parent_element, css_selector, attribute, default_value="NOT FOUND"):
-    """Find an element via a CSS selector and extract the content of one of its attributes
-    Returns the default value if the elmenent cannot be found.
+def find_element_or_default(parent_element, css_selector, default_value="NOT FOUND", wait_time = 20):
+    """Find an element via a CSS selector and return it.
+    If not found, return the default_value argument.
     """
-    output = default_value # initialize output 
-    try: # try to get element
-        output = parent_element.find_element_by_css_selector(css_selector).get_attribute(attribute)
+    element = default_value # initialize output 
+    try:
+        element = WebDriverWait(parent_element, wait_time).until(
+            EC.presence_of_element_located(('css', css_selector))
+        )
     except:
+        # Uncomment to throw an error
+        # raise NameError("Element: " + css_selector + " not found")
         pass
-    return output
+    return element
 
-def wait_for_page_load():
+def find_element_text_or_default(parent_element, css_selector, default_value="NOT FOUND", wait_time = 20):
+    """Find an element via a CSS selector and return its text.
+    Return the default value if the element cannot be found.
+    """
+    element = find_element_or_default(parent_element, css_selector, default_value, wait_time)
+    if element is default_value:
+        return default_value
+    else:
+        return element.text
+
+def find_element_attribute_or_default(parent_element, css_selector, attribute, default_value="NOT FOUND", wait_time = 20):
+    """Find an element via a CSS selector and return the value of the given attribute.
+    Return the default value if the element cannot be found.
+    """
+    element = find_element_or_default(parent_element, css_selector, default_value, wait_time)
+    if element is default_value:
+        return default_value
+    else:
+        return element.get_attribute(attribute)
+
+def wait_for_page_load(parent_element, css_selector = ".avatarImage", wait_time = 20):
     """
     Wait enough time for a Trip Advisor page to load 
     """
+    # try:
+    #     element = WebDriverWait(parent_element, wait_time).until(
+    #         EC.presence_of_element_located(('css', css_selector))
+    #     )
+    # except TimeoutException:
+    #     print('The page is taking more time!')
     time.sleep(6)
+    # pass
 
 def element_is_disabled(element):
     """
@@ -42,7 +78,7 @@ def element_is_disabled(element):
 
 def string_is_integer(s):
     """
-
+    Check if the given string contain an integer
     """
     try: 
         int(s)
@@ -50,28 +86,18 @@ def string_is_integer(s):
     except ValueError:
         return False
 
-def selenium_breaths(parent, css_selector, wait_time = 20):
+def click_button(parent, css_selector):
     """
-    Implementation of the "explicit wait" to give the right time to selenium to find all selector
+    Check if there is a button and if it is clickable, click it
+    Return True if the button was clicked, False otherwise
     """
+    output = False
     try:
-        element = WebDriverWait(parent, wait_time).until(
-            EC.presence_of_element_located(('css', css_selector))
-        )
-        #print(out)         
+        button = parent.find_element_by_css_selector(css_selector)
+        if button.is_enabled():
+            button.click()
+            output = True
+    # Ok if the button does not exist: go ahead
     except:
-        raise NameError("Element: " + css_selector + " not found")
-    return element      
-
-
-# def selenium_breaths_attribute(driver, css_selector, attribute):
-#     """
-#     Implementation of the "explicit wait" to give the right time to selenium to find all selector
-#     """
-#     try:
-#         out = WebDriverWait(driver, 20).until(
-#             EC.presence_of_element_located(('css', css_selector).__getattribute__(attribute))
-#             )
-#         #print(out)
-#     except:
-#         raise NameError("Element: " + css_selector + " not found")
+        pass
+    return output    

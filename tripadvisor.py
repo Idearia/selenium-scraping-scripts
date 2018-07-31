@@ -25,6 +25,12 @@ import review_functions
 # Webpage to crawl
 url = sys.argv[1] #https://www.tripadvisor.it/Restaurant_Review-g187791-d2321183-Reviews-Sacco_Bistrot-Rome_Lazio.html
 
+# Timeout for element search in seconds
+wait_time = 10
+
+# Flag for not found element
+not_found_flag = "NOT FOUND"
+
 # Main review element, containing all other elements (title, description, ratings...)
 review_container_selector = ".review"
 
@@ -38,6 +44,7 @@ date_selector = ".ratingDate"
 more_selector = ".ulBlueLinks"
 page_name_selector = ".heading_title"
 page_number_selector = "a.pageNum.last.taLnk"
+reviewer_img_selector = ".avatarImage"
 
 # Navigation element for next page
 buttonNext_selector = "a.next.ui_button"
@@ -47,19 +54,16 @@ page_number_tot = int
 
 # Select driver (Chrome)
 options = webdriver.ChromeOptions()
-options.add_argument('headless')   # Uncomment to use headless browser
+#options.add_argument('headless')   # Uncomment to use headless browser
 driver = webdriver.Chrome(chrome_options=options)
-
-# Each 'find' by Selenium has this amount of time to work
-#driver.implicitly_wait(1)
 
 # Get HTML from URL
 driver.get(url)
-common.wait_for_page_load()
+common.wait_for_page_load(driver, reviewer_img_selector, wait_time)
 page_number_tot = common.find_element_text_or_default(driver, page_number_selector)
 
 # Get Title for CSV
-page_name = driver.find_element_by_css_selector(page_name_selector).text
+page_name = common.find_element_text_or_default(driver, page_name_selector, not_found_flag, wait_time)
 
 # Add CSV heading
 review_functions.trip_setting_csv(page_name)
@@ -79,17 +83,10 @@ while True: # each iteration is a review page
     print( '>>>>>>>>>>>> PAGE NUMBER %d <<<<<<<<<<<<<<<<<<' % page_number )
 
     # Get all review containers
-    review_container_elements = driver.find_elements_by_css_selector(review_container_selector)
+    review_container_elements = common.find_elements_or_default(driver, review_container_selector, not_found_flag, wait_time)
 
     # Expand review area by clicking on the "Click for more" button
-    try:
-        click_for_more_element = driver.find_element_by_css_selector(more_selector)
-        if click_for_more_element.is_enabled():
-            click_for_more_element.click()
-    # Ok if the button does not exist: it means all reviews on the
-    # page are short
-    except:
-        pass
+    common.click_button(driver, more_selector)
 
     # Loop through the list of review containers and for each them scrape the
     # relevant review elements
@@ -104,48 +101,32 @@ while True: # each iteration is a review page
         # Initialize review dictionary
         review_dict = {}
 
-        # Give time to Selenium to identify all the selectors
+        # Give time to Selenium to identify all the selectors and
+        # get relevant review elements using CSS selectors
+        review_dict['title'] = common.find_element_text_or_default(review, title_selector,not_found_flag,wait_time)
+        review_dict['date'] = common.find_element_attribute_or_default(review, date_selector, 'title',not_found_flag,wait_time)
+        review_dict['reviewer_name'] = common.find_element_text_or_default(review, reviewer_name_selector,not_found_flag,wait_time)
+        review_dict['text'] = common.find_element_text_or_default(review, text_selector,not_found_flag,wait_time)
+        review_dict['mobile'] = common.find_element_text_or_default(review, is_mobile_selector,not_found_flag,wait_time)
+        review_dict['rating'] =  common.find_element_attribute_or_default(review, rating_selector, 'class',not_found_flag,wait_time)
+        # review_dict['reviewer_id'] = review.find_element_by_class_name('memberOverlayLink').get_attribute('id')
 
-        # Get relevant review elements using CSS selectors
-        title_element = common.selenium_breaths(review, title_selector)
-        review_dict['title'] = title_element.text
-        # review_dict['title'] =     #common.find_element_text_or_default(review, title_selector)
+        # Sanitize review elements
+        if len(review_dict['rating']) > 2:
+            review_dict['rating'] = review_dict['rating'][-2:-1] #ui_bubble_rating bubble_30
 
-        print("TITOLO = " + review_dict['title'])
+        # Validate review dictionary
+        review_functions.validate_review(review_dict)
 
-        # common.selenium_breaths(driver, date_selector)
-        # review_dict['date'] = common.find_element_attribute_or_default(review, date_selector, 'title')
+        # Uncomment to print reviews to screen
+        review_functions.trip_print_review(review_dict)
 
-        # common.selenium_breaths(driver, reviewer_name_selector)
-        # review_dict['reviewer_name'] = common.find_element_text_or_default(review, reviewer_name_selector)
-
-        # common.selenium_breaths(driver, text_selector)
-        # review_dict['text'] = common.find_element_text_or_default(review, text_selector)
-
-        # common.selenium_breaths(driver, is_mobile_selector)
-        # review_dict['mobile'] = common.find_element_text_or_default(review, is_mobile_selector)
-
-        # common.selenium_breaths(driver, rating_selector)
-        # review_dict['rating'] =  common.find_element_attribute_or_default(review, rating_selector, 'class')
-
-        # # review_dict['reviewer_id'] = review.find_element_by_class_name('memberOverlayLink').get_attribute('id')
-
-        # # Sanitize review elements
-        # if len(review_dict['rating']) > 2:
-        #     review_dict['rating'] = review_dict['rating'][-2:-1] #ui_bubble_rating bubble_30
-
-        # # Validate review dictionary
-        # # review_functions.validate_review(review_dict)
-
-        # # Uncomment to print reviews to screen
-        # review_functions.trip_print_review(review_dict)
-
-        # # Uncomment to export results in csv file
-        # #review_functions.trip_export_review(review_dict, page_name)
+        # Uncomment to export results in csv file
+        #review_functions.trip_export_review(review_dict, page_name)
 
     # Determine whether we are on the last page
     last_page = False
-    next_button_element = driver.find_element_by_css_selector(buttonNext_selector)
+    next_button_element =  common.find_element_or_default(driver, buttonNext_selector, not_found_flag, wait_time)
     try:
         last_page = common.element_is_disabled(next_button_element)
     except:
@@ -157,7 +138,7 @@ while True: # each iteration is a review page
         break
     else:
         next_button_element.click()
-        common.wait_for_page_load()
+        common.wait_for_page_load(driver, reviewer_img_selector, wait_time)
         print( '\n' )
 
 
