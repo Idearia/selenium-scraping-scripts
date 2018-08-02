@@ -34,7 +34,7 @@ url = sys.argv[1]
 # Timeout for element search in seconds
 wait_time = 10
 wait_page_load = 6
-wait_review_load = 2
+wait_review_load = 0.5
 
 # Flag for not found element
 not_found_flag = "NOT FOUND"
@@ -60,10 +60,12 @@ review_number = 0
 page_number = 1
 page_number_tot = int
 
-# Select driver (Chrome)
-options = webdriver.ChromeOptions()
-options.add_argument('headless')   # Uncomment to use headless browser
-driver = webdriver.Chrome(chrome_options=options)
+# If True headless mode On, otherwise Off
+headless_mode = False
+
+# Uncomment which driver do you want to use
+driver = common.Driver_Chrome(headless_mode)
+#driver = common.Driver_Firefox(headless_mode)
 
 # Get HTML from URL
 driver.get(url)
@@ -95,7 +97,10 @@ while True: # each iteration is a review page
 
     # Expand review area by clicking on the "Click for more" button
     common.click_button(driver, more_selector)
-
+    
+    # Wait for loading reviews
+    common.wait_for_(wait_review_load)
+    
     # Loop through the list of review containers and for each them scrape the
     # relevant review elements
     for review in review_container_elements:
@@ -119,21 +124,18 @@ while True: # each iteration is a review page
         review_dict['rating'] =  common.find_element_attribute_or_default(review, rating_selector, 'class',not_found_flag,wait_time)
         # review_dict['reviewer_id'] = review.find_element_by_class_name('memberOverlayLink').get_attribute('id')
         
-        # Wait for loading reviews
-        common.wait_for_(wait_review_load)
-        
         # Sanitize review elements
         if len(review_dict['rating']) > 2:
             review_dict['rating'] = review_dict['rating'][-2:-1] #ui_bubble_rating bubble_30
 
         # Validate review dictionary
-        review_functions.validate_review(review_dict)
+        #review_functions.validate_review(review_dict)
 
         # Uncomment to print reviews to screen
         review_functions.trip_print_review(review_dict)
 
         # Uncomment to export results in csv file
-        review_functions.trip_export_review(review_dict, page_name)
+        #review_functions.trip_export_review(review_dict, page_name)
 
     # Determine whether we are on the last page
     last_page = False

@@ -2,6 +2,7 @@ import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium import webdriver
 
 def find_elements_or_default(parent_element, css_selector, default_value="NOT FOUND", wait_time = 20):
     """Find elements via a CSS selector and return them as a list.
@@ -95,3 +96,27 @@ def click_button(parent, css_selector):
     except:
         pass
     return output    
+
+def Driver_Chrome(headless):
+    """
+    Enable Google Chrome (Chromedriver) in Headless mode or not
+    """
+    if headless:
+        options = webdriver.ChromeOptions()
+        options.add_argument('headless')
+        driver = webdriver.Chrome(chrome_options=options)
+    else:
+        driver = webdriver.Chrome()
+    return driver    
+
+def Driver_Firefox(headless):
+    """
+    Enable Mozilla Firefox (Gekodriver) in Headless mode or not
+    """
+    if headless:
+        options = webdriver.FirefoxOptions()
+        options.add_argument('headless')
+        driver = webdriver.Firefox(firefox_options=options)
+    else:
+        driver = webdriver.Firefox()
+    return driver
