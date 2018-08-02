@@ -9,14 +9,6 @@ trip_heading = ['Timestamp', 'Titolo', 'Testo', 'Utente - Nome', 'Dispositivo', 
 face_heading = ['Reviewer Name', 'Date', 'Rating Value', 'Text']
 timer = time.time()
 timestamp = datetime.datetime.fromtimestamp(timer).strftime('%d-%m-%Y %H:%M:%S')
-# def get_reviews(url,aggregator):
-#     """
-#     Takes the URL of the page from which to start scraping reviews.
-#     Returns a list of reviews, where each review is represented by
-#     a review dictionary.
-#     """
-#     review_css_selectors = review_functions.css_selectors[aggregator]
-
 
 def validate_review(review_dict):
     """
@@ -75,19 +67,19 @@ def trip_export_review(review_dict, page_name):
 #     date['Data'] = pd.to_datetime(dict, format="%d %m %Y")
 #     print(date['Data'])
 
-# Facebook output
-def face_setting_csv(page_name):
-    head = csv.writer(open("Face_" + page_name + ".csv","a"), delimiter=',',quoting=csv.QUOTE_ALL)
-    head.writerow(face_heading) 
+# # Facebook output
+# def face_setting_csv(page_name):
+#     head = csv.writer(open("Face_" + page_name + ".csv","a"), delimiter=',',quoting=csv.QUOTE_ALL)
+#     head.writerow(face_heading) 
 
-def face_print_review(reviewer_name, date, rating_value, text):
-    print("------------------------------------------------")
-    print("Reviewer:   " + reviewer_name)
-    print("Date:       " + date)
-    print("Rating:     " + rating_value)
-    print("Text:       " + text)
+# def face_print_review(reviewer_name, date, rating_value, text):
+#     print("------------------------------------------------")
+#     print("Reviewer:   " + reviewer_name)
+#     print("Date:       " + date)
+#     print("Rating:     " + rating_value)
+#     print("Text:       " + text)
 
-def face_export_review(reviewer_name, date, rating_value, text, page_name):
-    face_export = [reviewer_name, date, rating_value, text]
-    face_out = csv.writer(open("Face_" + page_name + ".csv","a"), delimiter=',',quoting=csv.QUOTE_ALL)
-    face_out.writerow(face_export)    
+# def face_export_review(reviewer_name, date, rating_value, text, page_name):
+#     face_export = [reviewer_name, date, rating_value, text]
+#     face_out = csv.writer(open("Face_" + page_name + ".csv","a"), delimiter=',',quoting=csv.QUOTE_ALL)
+#     face_out.writerow(face_export)    

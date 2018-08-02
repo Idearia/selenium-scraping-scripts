@@ -53,17 +53,11 @@ def find_element_attribute_or_default(parent_element, css_selector, attribute, d
     else:
         return element.get_attribute(attribute)
 
-def wait_for_page_load(parent_element, css_selector = ".avatarImage", wait_time = 20):
+def wait_for_(wait_time = 20):
     """
     Wait enough time for a Trip Advisor page to load 
     """
-    # try:
-    #     element = WebDriverWait(parent_element, wait_time).until(
-    #         EC.presence_of_element_located(('css', css_selector))
-    #     )
-    # except TimeoutException:
-    #     print('The page is taking more time!')
-    time.sleep(6)
+    time.sleep(wait_time)
     # pass
 
 def element_is_disabled(element):

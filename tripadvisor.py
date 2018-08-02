@@ -23,10 +23,18 @@ import common
 import review_functions
 
 # Webpage to crawl
-url = sys.argv[1] #https://www.tripadvisor.it/Restaurant_Review-g187791-d2321183-Reviews-Sacco_Bistrot-Rome_Lazio.html
+url = sys.argv[1]
+# Sacco Risto:      https://www.tripadvisor.it/Restaurant_Review-g187791-d4355291-Reviews-Ristorante_Sacco-Rome_Lazio.html
+# Sacco Bistrot:    https://www.tripadvisor.it/Restaurant_Review-g187791-d2321183-Reviews-Sacco_Bistrot-Rome_Lazio.html
+# Freddo:           https://www.tripadvisor.it/Restaurant_Review-g187791-d10455235-Reviews-Freddo-Rome_Lazio.html
+# Pepe Gallia:      https://www.tripadvisor.it/Restaurant_Review-g187791-d10800552-Reviews-Pepe-Rome_Lazio.html
+# Pepe Tuscolana:   https://www.tripadvisor.it/Restaurant_Review-g187791-d5267113-Reviews-Sacco_Pizza_a_Domicilio-Rome_Lazio.html
+
 
 # Timeout for element search in seconds
 wait_time = 10
+wait_page_load = 6
+wait_review_load = 2
 
 # Flag for not found element
 not_found_flag = "NOT FOUND"
@@ -54,12 +62,12 @@ page_number_tot = int
 
 # Select driver (Chrome)
 options = webdriver.ChromeOptions()
-#options.add_argument('headless')   # Uncomment to use headless browser
+options.add_argument('headless')   # Uncomment to use headless browser
 driver = webdriver.Chrome(chrome_options=options)
 
 # Get HTML from URL
 driver.get(url)
-common.wait_for_page_load(driver, reviewer_img_selector, wait_time)
+common.wait_for_(wait_page_load)
 page_number_tot = common.find_element_text_or_default(driver, page_number_selector)
 
 # Get Title for CSV
@@ -110,7 +118,10 @@ while True: # each iteration is a review page
         review_dict['mobile'] = common.find_element_text_or_default(review, is_mobile_selector,not_found_flag,wait_time)
         review_dict['rating'] =  common.find_element_attribute_or_default(review, rating_selector, 'class',not_found_flag,wait_time)
         # review_dict['reviewer_id'] = review.find_element_by_class_name('memberOverlayLink').get_attribute('id')
-
+        
+        # Wait for loading reviews
+        common.wait_for_(wait_review_load)
+        
         # Sanitize review elements
         if len(review_dict['rating']) > 2:
             review_dict['rating'] = review_dict['rating'][-2:-1] #ui_bubble_rating bubble_30
@@ -122,7 +133,7 @@ while True: # each iteration is a review page
         review_functions.trip_print_review(review_dict)
 
         # Uncomment to export results in csv file
-        #review_functions.trip_export_review(review_dict, page_name)
+        review_functions.trip_export_review(review_dict, page_name)
 
     # Determine whether we are on the last page
     last_page = False
@@ -138,7 +149,7 @@ while True: # each iteration is a review page
         break
     else:
         next_button_element.click()
-        common.wait_for_page_load(driver, reviewer_img_selector, wait_time)
+        common.wait_for_(wait_page_load)
         print( '\n' )
 
 
