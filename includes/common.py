@@ -2,6 +2,7 @@ import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium import webdriver
 
 def find_elements_or_default(parent_element, css_selector, default_value="NOT FOUND", wait_time = 20):
@@ -24,14 +25,14 @@ def find_element_or_default(parent_element, css_selector, default_value="NOT FOU
     If not found, return the default_value argument.
     """
     element = default_value # initialize output 
-    try:
-        element = WebDriverWait(parent_element, wait_time).until(
-            EC.presence_of_element_located(('css', css_selector))
-        )
-    except:
+    #try:
+    element = WebDriverWait(parent_element, wait_time).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
+    )
+    #except:
         # Uncomment to throw an error
         # raise NameError("Element: " + css_selector + " not found")
-        pass
+    #    pass
     return element
 
 def find_element_text_or_default(parent_element, css_selector, default_value="NOT FOUND", wait_time = 20):
@@ -84,18 +85,18 @@ def string_is_integer(s):
 def click_button(parent, css_selector):
     """
     Check if there is a button and if it is clickable, click it
-    Return True if the button was clicked, False otherwise
+    Return the button text if the button was clicked, False otherwise
     """
     output = False
     try:
         button = parent.find_element_by_css_selector(css_selector)
         if button.is_enabled():
             button.click()
-            output = True
+            output = button.text
     # Ok if the button does not exist: go ahead
     except:
         pass
-    return output    
+    return output
 
 def Driver_Chrome(headless):
     """
